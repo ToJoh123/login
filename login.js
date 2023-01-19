@@ -2,7 +2,7 @@ const mysql = require('mysql');
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-
+const validator = require('validator');
 const connection = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
@@ -27,6 +27,11 @@ app.use(express.static(path.join(__dirname, 'static')));
 app.get('/', function(request, response) {
 	// Render login template
 	response.sendFile(path.join(__dirname + '/login.html'));
+});
+// http://localhost:3000/register
+app.get('/register', function(request, response) {
+	// Render login template
+	response.sendFile(path.join(__dirname + '/register.html'));
 });
 
 // http://localhost:3000/auth
@@ -73,6 +78,41 @@ app.get('/home', function(request, response) {
 		response.send('Please login to view this page!');
 	}
 	response.end();
+});
+
+// http://localhost:3000/register/new
+app.post('/register/new', function(request, response) {
+	// Capture the input fields
+	let username = request.body.username;
+	let password = request.body.password;
+	let email = request.body.email;
+
+	// Check if name or about field is empty
+	if (validator.isEmpty(username) || validator.isEmpty(password)) {
+		console.log('Name or password field is empty');
+	} else if (!validator.isEmail(email)) {
+		// Check if email format is correct
+		console.log('Email format is incorrect');
+	} else {
+		//sanitize the input
+		cleanName = validator.escape(username);
+		cleanPassword = validator.escape(password);
+		cleanEmail = validator.escape(email);
+		// query to insert into database
+		connection.query(
+			'INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)',
+			[ cleanName, cleanEmail, cleanEmail ],
+			function(error, results, fields) {
+				// If there is an issue with the query, output the error
+				if (error) {
+					console.log(error);
+				} else {
+					response.redirect('/');
+				}
+				response.end();
+			}
+		);
+	}
 });
 
 app.listen(3000);
