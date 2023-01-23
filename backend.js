@@ -71,7 +71,7 @@ app.post('/auth', function(request, response) {
 app.get('/home', function(request, response) {
 	// If the user is loggedin
 	if (request.session.loggedin) {
-		// Output username
+		// redirect to home page
 		response.send('Welcome back, ' + request.session.username + '!');
 	} else {
 		// Not logged in
@@ -82,6 +82,7 @@ app.get('/home', function(request, response) {
 
 // http://localhost:3000/register/new
 app.post('/register/new', function(request, response) {
+	console.log('hello');
 	// Capture the input fields
 	let username = request.body.username;
 	let password = request.body.password;
@@ -89,10 +90,10 @@ app.post('/register/new', function(request, response) {
 
 	// Check if name or about field is empty
 	if (validator.isEmpty(username) || validator.isEmpty(password)) {
-		console.log('Name or password field is empty');
+		response.send('Name or password field is empty');
 	} else if (!validator.isEmail(email)) {
 		// Check if email format is correct
-		console.log('Email format is incorrect');
+		response.send('Email format is incorrect');
 	} else {
 		//sanitize the input
 		cleanName = validator.escape(username);
@@ -105,7 +106,7 @@ app.post('/register/new', function(request, response) {
 			function(error, results, fields) {
 				// If there is an issue with the query, output the error
 				if (error) {
-					console.log(error);
+					response.send(error, 'Error', fields, results);
 				} else {
 					response.redirect('/');
 				}
