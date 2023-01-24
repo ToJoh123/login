@@ -48,7 +48,9 @@ app.post('/auth', function(request, response) {
 			fields
 		) {
 			// If there is an issue with the query, output the error
-			if (error) throw error;
+			if (error) {
+				console.log(error);
+			}
 			// If the account exists
 			if (results.length > 0) {
 				// Authenticate the user
@@ -73,6 +75,8 @@ app.get('/home', function(request, response) {
 	if (request.session.loggedin) {
 		// redirect to home page
 		response.send('Welcome back, ' + request.session.username + '!');
+		//display the data from the database
+		console.log(connection);
 	} else {
 		// Not logged in
 		response.send('Please login to view this page!');
@@ -82,7 +86,6 @@ app.get('/home', function(request, response) {
 
 // http://localhost:3000/register/new
 app.post('/register/new', function(request, response) {
-	console.log('hello');
 	// Capture the input fields
 	let username = request.body.username;
 	let password = request.body.password;
@@ -107,8 +110,10 @@ app.post('/register/new', function(request, response) {
 				// If there is an issue with the query, output the error
 				if (error) {
 					response.send(error, 'Error', fields, results);
+					console.log(error);
 				} else {
 					response.redirect('/');
+					console.log('Account created', fields, results);
 				}
 				response.end();
 			}
@@ -116,4 +121,24 @@ app.post('/register/new', function(request, response) {
 	}
 });
 
+// http://localhost:3000/list
+
+app.get('/listmember', function(request, response) {
+	//this code will display the data from the database
+	connection.query('SELECT * FROM accounts', function(error, results, fields) {
+		// If there is an issue with the query, output the error
+		if (error) {
+			console.log(error);
+		}
+		//return the data as a json object
+		console.log('printing results');
+		response.json(results);
+	});
+});
+
 app.listen(3000);
+
+// create user friend@'172.20.201.23.A' identified by 'pword';
+// create user friend@'172.26.16.1.B' identified by 'pword';
+// mysql --user friend --host '172.26.16.1' --password='pword'
+// mysql --user friend --host '172.20.201.108' --password='pword'
